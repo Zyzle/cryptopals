@@ -1,0 +1,10 @@
+[package]
+name = "cryptopals"
+version = "0.1.0"
+authors = ["Colin McCulloch <colin@zyzle.dev>"]
+edition = "2018"
+
+[dependencies]
+clap = "2.33.0"
+time = "0.1.42"
+base64 = "0.10.1"

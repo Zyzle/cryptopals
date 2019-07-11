@@ -12,8 +12,39 @@ impl Uint8Vector {
         Ok(Uint8Vector(arr))
     }
 
-    pub fn to_hex_str(self) -> String {
-        encode_hex(self.0.as_slice())
+    pub fn to_hex_str(&self) -> String {
+        encode_hex(self.as_slice())
+    }
+
+    pub fn to_xor_with(&self, o: &Uint8Vector) -> Uint8Vector {
+        assert_eq!(self.len(), o.len());
+        Uint8Vector(self.iter()
+            .zip(o.iter())
+            .map(|(x, y)| *x ^ *y)
+            .collect()
+        )
+    }
+
+    pub fn valid_ascii_score(&self) -> i32 {
+        let mut score = 0;
+        for &b in self.iter() {
+            if b.is_ascii_alphanumeric() || b.is_ascii_whitespace() {
+                score += 1;
+            }
+            else {
+                score -= 1;
+            }
+        }
+        score
+    }
+
+    pub fn to_ascii_str(&self) -> String {
+        let mut res = String::with_capacity(self.len());
+
+        for &b in self.iter() {
+            write!(&mut res, "{}", b as char).unwrap();
+        }
+        res
     }
 }
 

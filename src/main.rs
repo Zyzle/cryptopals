@@ -19,12 +19,14 @@ fn one() -> bool {
 
 fn two() -> bool {
     let expected_str = "746865206b696420646f6e277420706c6179";
-    let is = decode_hex("1c0111001f010100061a024b53535009181c").unwrap();
-    let initial = Uint8Vector(is);
-    let ifx = decode_hex("686974207468652062756c6c277320657965").unwrap();
-    let for_xor = Uint8Vector(ifx);
+    let initial = Uint8Vector::from_hex_str("1c0111001f010100061a024b53535009181c").unwrap();
+    let for_xor = Uint8Vector::from_hex_str("686974207468652062756c6c277320657965").unwrap();
     let result = initial ^ for_xor;
-    expected_str == encode_hex(result.as_slice())
+    expected_str == result.to_hex_str()
+}
+
+fn three() {
+    let hex_str = "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736";
 }
 
 fn main() {

@@ -3,6 +3,20 @@ use std::{fmt::Write, num::ParseIntError, ops::BitXor, ops::Deref};
 #[derive(Debug, PartialEq)]
 pub struct Uint8Vector(pub Vec<u8>);
 
+impl Uint8Vector {
+    pub fn from_hex_str(s: &str) -> Result<Uint8Vector, ParseIntError> {
+        let arr = match decode_hex(s) {
+            Ok(v) => v,
+            Err(e) => return Err(e)
+        };
+        Ok(Uint8Vector(arr))
+    }
+
+    pub fn to_hex_str(self) -> String {
+        encode_hex(self.0.as_slice())
+    }
+}
+
 impl BitXor for Uint8Vector {
     type Output = Self;
     

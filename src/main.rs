@@ -3,7 +3,8 @@
 extern crate base64;
 extern crate clap;
 
-use std::{fmt::Write, fs::File, io};
+use std::{fmt::Write, fs::File, io, io::BufReader};
+use std::io::prelude::*;
 
 use base64::{encode};
 use clap::{App, Arg};
@@ -53,9 +54,21 @@ fn three() -> String {
     output
 }
 
-fn file_read() -> Result<File, io::Error> {
-    let f = r#try!(File::open("4.txt"));
-    Ok(f)
+fn file_read() -> Result<io::BufReader<File>, io::Error> {
+    let f = File::open("4.txt")?;
+    let file = BufReader::new(f);
+    Ok(file)
+}
+
+fn four() -> String {
+    let x = file_read().unwrap();
+    let mut file_vecs: Vec<Uint8Vector> = Vec::new();
+    
+    for line in x.lines() {
+        println!("{}", line.unwrap());
+    }
+
+    String::from("Done")
 }
 
 fn main() {
@@ -77,13 +90,20 @@ fn main() {
             .long("challenge")
             .help("The propblem solution to run from then chosen set")
         )
+        .arg(Arg::with_name("FILENAME")
+            .required(false)
+            .takes_value(true)
+            .short("f")
+            .long("filename")
+            .help("If a challenge requires an external file, pass it in here")
+        )
         .get_matches();
 
     let _set = matches.value_of("SETNUM").unwrap();
     let _prob = matches.value_of("CHALLNUM").unwrap();
 
     let start = time::precise_time_ns();
-    let result = three();
+    let result = four();
 
     println!("Result: {}", result);
     println!("Took {} seconds",

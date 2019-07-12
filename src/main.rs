@@ -62,11 +62,23 @@ fn file_read() -> Result<io::BufReader<File>, io::Error> {
 
 fn four() -> String {
     let x = file_read().unwrap();
-    let mut file_vecs: Vec<Uint8Vector> = Vec::new();
+    let mut file_vecs: Vec<CryptTestResult> = Vec::new();
     
     for line in x.lines() {
-        println!("{}", line.unwrap());
+        let l = line.unwrap();
+        let crypt_vec = Uint8Vector::from_hex_str(&l).unwrap();
+        file_vecs.extend(crypt_test(&crypt_vec));
     }
+    
+    let mut output = String::from("Best candidates:\n");
+
+    file_vecs.sort_by(|a, b| b.score().cmp(&a.score()));
+
+    for res in file_vecs[..5].iter() {
+        writeln!(&mut output, "Score: {}\t value: {}", res.score(), res.bytes().to_ascii_str()).unwrap();
+    }
+
+    println!("{}", output);
 
     String::from("Done")
 }

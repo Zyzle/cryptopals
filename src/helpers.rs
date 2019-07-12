@@ -70,6 +70,30 @@ impl Deref for Uint8Vector {
     }
 }
 
+#[derive(Debug)]
+pub struct CryptTestResult {
+    score: i32,
+    bytes: Uint8Vector
+}
+
+impl CryptTestResult {
+
+    pub fn new(score: i32, bytes: Uint8Vector) -> CryptTestResult {
+        CryptTestResult {
+            score: score,
+            bytes: bytes
+        }
+    }
+
+    pub fn score(&self) -> &i32 {
+        &self.score
+    }
+
+    pub fn bytes(&self) -> &Uint8Vector {
+        &self.bytes
+    }
+}
+
 pub fn decode_hex(s: &str) -> Result<Vec<u8>, ParseIntError> {
     (0..s.len())
         .step_by(2)

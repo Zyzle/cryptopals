@@ -83,39 +83,64 @@ fn four() -> String {
     String::from("Done")
 }
 
-fn main() {
-    let matches = App::new("cryptopals")
-        .version("0.1.0")
-        .author("Colin McCulloch <colin@zyzle.dev>")
-        .about("My solutions to the cryptopals exercises")
-        .arg(Arg::with_name("SETNUM")
-            .required(true)
-            .takes_value(true)
-            .short("s")
-            .long("set")
-            .help("The set of exercises to pick")
-        )
-        .arg(Arg::with_name("CHALLNUM")
-            .required(true)
-            .takes_value(true)
-            .short("c")
-            .long("challenge")
-            .help("The propblem solution to run from then chosen set")
-        )
-        .arg(Arg::with_name("FILENAME")
-            .required(false)
-            .takes_value(true)
-            .short("f")
-            .long("filename")
-            .help("If a challenge requires an external file, pass it in here")
-        )
-        .get_matches();
+fn five() -> bool {
+    let expected_hex = String::from("0b3637272a2b2e63622c2e69692a2369\
+                                     3a2a3c6324202d623d63343c2a262263\
+                                     24272765272a282b2f20430a652e2c65\
+                                     2a3124333a653e2b2027630c692b2028\
+                                     3165286326302e27282f");
 
-    let _set = matches.value_of("SETNUM").unwrap();
-    let _prob = matches.value_of("CHALLNUM").unwrap();
+    let plain_str = String::from("Burning 'em, if you ain't quick and nimble\n\
+                                  I go crazy when I hear a cymbal");
+    let plain_vec = Uint8Vector::from_str(&plain_str);
+    let key = String::from("ICE");
+    let key_vec = Uint8Vector::from_str(&key);
+
+    let crypted_vec = plain_vec.to_rolling_xor_with(key_vec.as_slice());
+    crypted_vec.to_hex_str() == expected_hex
+}
+
+fn test() {
+    let roll = vec!["I", "C", "E"];
+
+    for n in 0..12 {
+        println!("{}", roll[n % roll.len()]);
+    }
+}
+
+fn main() {
+    // let matches = App::new("cryptopals")
+    //     .version("0.1.0")
+    //     .author("Colin McCulloch <colin@zyzle.dev>")
+    //     .about("My solutions to the cryptopals exercises")
+    //     .arg(Arg::with_name("SETNUM")
+    //         .required(true)
+    //         .takes_value(true)
+    //         .short("s")
+    //         .long("set")
+    //         .help("The set of exercises to pick")
+    //     )
+    //     .arg(Arg::with_name("CHALLNUM")
+    //         .required(true)
+    //         .takes_value(true)
+    //         .short("c")
+    //         .long("challenge")
+    //         .help("The propblem solution to run from then chosen set")
+    //     )
+    //     .arg(Arg::with_name("FILENAME")
+    //         .required(false)
+    //         .takes_value(true)
+    //         .short("f")
+    //         .long("filename")
+    //         .help("If a challenge requires an external file, pass it in here")
+    //     )
+    //     .get_matches();
+
+    // let _set = matches.value_of("SETNUM").unwrap();
+    // let _prob = matches.value_of("CHALLNUM").unwrap();
 
     let start = time::precise_time_ns();
-    let result = four();
+    let result = five();
 
     println!("Result: {}", result);
     println!("Took {} seconds",

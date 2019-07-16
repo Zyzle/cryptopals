@@ -4,6 +4,12 @@ use std::{fmt::Write, num::ParseIntError, ops::BitXor, ops::Deref};
 pub struct Uint8Vector(pub Vec<u8>);
 
 impl Uint8Vector {
+
+    pub fn from_str(s: &String) -> Uint8Vector {
+        let bytes = s.as_bytes();
+        Uint8Vector(Vec::from(bytes))
+    }
+
     pub fn from_hex_str(s: &str) -> Result<Uint8Vector, ParseIntError> {
         let arr = match decode_hex(s) {
             Ok(v) => v,
@@ -23,6 +29,15 @@ impl Uint8Vector {
             .map(|(x, y)| *x ^ *y)
             .collect()
         )
+    }
+
+    pub fn to_rolling_xor_with(&self, o: &[u8]) -> Uint8Vector {
+        let mut new_vec: Vec<u8> = Vec::new();
+        for (n, byte) in self.iter().enumerate() {
+            new_vec.push(*byte ^ o[n % o.len()]);
+        }
+
+        Uint8Vector(new_vec)
     }
 
     pub fn valid_ascii_score(&self) -> i32 {

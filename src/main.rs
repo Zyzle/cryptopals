@@ -7,11 +7,10 @@ use std::{fmt::Write, fs::File, io, io::BufReader};
 use std::io::prelude::*;
 
 use base64::{encode};
-use clap::{App, Arg};
 use time;
 
 mod helpers;
-use helpers::{decode_hex, CryptTestResult, Uint8Vector};
+use helpers::{decode_hex, CryptTestResult, CryptoVec};
 
 fn one() -> bool {
     let hex_str = "49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d";
@@ -22,18 +21,18 @@ fn one() -> bool {
 
 fn two() -> bool {
     let expected_str = "746865206b696420646f6e277420706c6179";
-    let initial = Uint8Vector::from_hex_str("1c0111001f010100061a024b53535009181c").unwrap();
-    let for_xor = Uint8Vector::from_hex_str("686974207468652062756c6c277320657965").unwrap();
+    let initial = CryptoVec::from_hex_str("1c0111001f010100061a024b53535009181c").unwrap();
+    let for_xor = CryptoVec::from_hex_str("686974207468652062756c6c277320657965").unwrap();
     let result = initial ^ for_xor;
     expected_str == result.to_hex_str()
 }
 
-fn crypt_test(crypted: &Uint8Vector) -> Vec<CryptTestResult> {
+fn crypt_test(crypted: &CryptoVec) -> Vec<CryptTestResult> {
     let t = crypted.len();
     let mut results: Vec<CryptTestResult> = Vec::new();
     for n in 0..u8::max_value() {
         let attempt_vec = vec![n; t];
-        let attempt = Uint8Vector(attempt_vec);
+        let attempt = CryptoVec(attempt_vec);
         let result = crypted.to_xor_with(&attempt);
         results.push(CryptTestResult::new(result.valid_ascii_score(), result ))
     }
@@ -43,7 +42,7 @@ fn crypt_test(crypted: &Uint8Vector) -> Vec<CryptTestResult> {
 }
 
 fn three() -> String {
-    let crypted = Uint8Vector::from_hex_str("1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736").unwrap();
+    let crypted = CryptoVec::from_hex_str("1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736").unwrap();
     let results = crypt_test(&crypted);
     let mut output = String::from("\n");
 
@@ -66,7 +65,7 @@ fn four() -> String {
     
     for line in x.lines() {
         let l = line.unwrap();
-        let crypt_vec = Uint8Vector::from_hex_str(&l).unwrap();
+        let crypt_vec = CryptoVec::from_hex_str(&l).unwrap();
         file_vecs.extend(crypt_test(&crypt_vec));
     }
     
@@ -92,20 +91,20 @@ fn five() -> bool {
 
     let plain_str = String::from("Burning 'em, if you ain't quick and nimble\n\
                                   I go crazy when I hear a cymbal");
-    let plain_vec = Uint8Vector::from_str(&plain_str);
+    let plain_vec = CryptoVec::from_str(&plain_str);
     let key = String::from("ICE");
-    let key_vec = Uint8Vector::from_str(&key);
+    let key_vec = CryptoVec::from_str(&key);
 
     let crypted_vec = plain_vec.to_rolling_xor_with(key_vec.as_slice());
     crypted_vec.to_hex_str() == expected_hex
 }
 
-fn test() {
-    let roll = vec!["I", "C", "E"];
-
-    for n in 0..12 {
-        println!("{}", roll[n % roll.len()]);
-    }
+fn test_hamming() -> u32{
+    let one = CryptoVec::from_str("this is a test");
+    let two = CryptoVec::from_str("wokka wokka!!!");
+    let hd = CryptoVec::hamming_distance(one.as_slice(), two.as_slice());
+    assert_eq!(37, hd);
+    hd
 }
 
 fn main() {
@@ -140,9 +139,9 @@ fn main() {
     // let _prob = matches.value_of("CHALLNUM").unwrap();
 
     let start = time::precise_time_ns();
-    let result = five();
+    let result = test_hamming();
 
-    println!("Result: {}", result);
+    println!("Result: {:?}", result);
     println!("Took {} seconds",
         (time::precise_time_ns() - start) as f64 / 10_f64.powf(9.0));
 }

@@ -1,43 +1,44 @@
 use std::{fmt::Write, num::ParseIntError, ops::BitXor, ops::Deref};
 
 #[derive(Debug, PartialEq)]
-pub struct Uint8Vector(pub Vec<u8>);
+pub struct CryptoVec(pub Vec<u8>);
 
-impl Uint8Vector {
+impl CryptoVec {
 
-    pub fn from_str(s: &String) -> Uint8Vector {
+}
+
+impl CryptoVec {
+
+    pub fn from_str(s: &str) -> CryptoVec {
         let bytes = s.as_bytes();
-        Uint8Vector(Vec::from(bytes))
+        CryptoVec(Vec::from(bytes))
     }
 
-    pub fn from_hex_str(s: &str) -> Result<Uint8Vector, ParseIntError> {
-        let arr = match decode_hex(s) {
-            Ok(v) => v,
-            Err(e) => return Err(e)
-        };
-        Ok(Uint8Vector(arr))
+    pub fn from_hex_str(s: &str) -> Result<CryptoVec, ParseIntError> {
+        let arr = decode_hex(s)?;
+        Ok(CryptoVec(arr))
     }
 
     pub fn to_hex_str(&self) -> String {
         encode_hex(self.as_slice())
     }
 
-    pub fn to_xor_with(&self, o: &Uint8Vector) -> Uint8Vector {
+    pub fn to_xor_with(&self, o: &CryptoVec) -> CryptoVec {
         assert_eq!(self.len(), o.len());
-        Uint8Vector(self.iter()
+        CryptoVec(self.iter()
             .zip(o.iter())
             .map(|(x, y)| *x ^ *y)
             .collect()
         )
     }
 
-    pub fn to_rolling_xor_with(&self, o: &[u8]) -> Uint8Vector {
+    pub fn to_rolling_xor_with(&self, o: &[u8]) -> CryptoVec {
         let mut new_vec: Vec<u8> = Vec::new();
         for (n, byte) in self.iter().enumerate() {
             new_vec.push(*byte ^ o[n % o.len()]);
         }
 
-        Uint8Vector(new_vec)
+        CryptoVec(new_vec)
     }
 
     pub fn valid_ascii_score(&self) -> i32 {
@@ -61,15 +62,24 @@ impl Uint8Vector {
         }
         res
     }
+
+    pub fn hamming_distance(a: &[u8], b: &[u8]) -> u32 {
+        assert_eq!(a.len(), b.len());
+        a.iter()
+            .zip(b.iter())
+            .map(|(x, y)| *x ^ *y)
+            .map(|z| z.count_ones())
+            .sum()
+    }
 }
 
-impl BitXor for Uint8Vector {
+impl BitXor for CryptoVec {
     type Output = Self;
     
-    fn bitxor(self, Uint8Vector(rhs): Self) -> Self::Output {
-        let Uint8Vector(lhs) = self;
+    fn bitxor(self, CryptoVec(rhs): Self) -> Self::Output {
+        let CryptoVec(lhs) = self;
         assert_eq!(lhs.len(), rhs.len());
-        Uint8Vector(lhs.iter()
+        CryptoVec(lhs.iter()
             .zip(rhs.iter())
             .map(|(x, y)| *x ^ *y)
             .collect()
@@ -77,7 +87,7 @@ impl BitXor for Uint8Vector {
     }
 }
 
-impl Deref for Uint8Vector {
+impl Deref for CryptoVec {
     type Target = Vec<u8>;
     
     fn deref(&self) -> &Vec<u8> {
@@ -88,15 +98,15 @@ impl Deref for Uint8Vector {
 #[derive(Debug)]
 pub struct CryptTestResult {
     score: i32,
-    bytes: Uint8Vector
+    bytes: CryptoVec
 }
 
 impl CryptTestResult {
 
-    pub fn new(score: i32, bytes: Uint8Vector) -> CryptTestResult {
+    pub fn new(score: i32, bytes: CryptoVec) -> CryptTestResult {
         CryptTestResult {
-            score: score,
-            bytes: bytes
+            score,
+            bytes
         }
     }
 
@@ -104,7 +114,7 @@ impl CryptTestResult {
         &self.score
     }
 
-    pub fn bytes(&self) -> &Uint8Vector {
+    pub fn bytes(&self) -> &CryptoVec {
         &self.bytes
     }
 }

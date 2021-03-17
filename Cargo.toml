@@ -7,4 +7,4 @@ edition = "2018"
 [dependencies]
 clap = "2.33.0"
 time = "0.1.42"
-base64 = "0.10.1"
+base64 = "0.13.0"
